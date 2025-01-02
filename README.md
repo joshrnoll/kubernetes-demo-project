@@ -1,5 +1,7 @@
+<img src="/k8s-logo.png" height=150>
+
 # Kubernetes Demo Project
-Just me trying to wrap my head around kubernetes.
+Just me trying to wrap my head around kubernetes. Read my stream of consciousness at [NOTES.md](/NOTES.md)
 
 ## Usage
 ### Start minikube with Docker driver
