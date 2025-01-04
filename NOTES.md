@@ -154,3 +154,22 @@ standard (default)   k8s.io/minikube-hostpath   Delete          Immediate       
 - Created an uptime-kuma user and created a monitor for google.com
 - Ran ```kubectl delete deployment uptime-kuma``` to delete all pods, then re-ran ```kubectl apply -f uptime-kuma-deployment```, then opened it in the browser again with ```minikube service uptime-kuma-service``` 
 - My user and monitor still exist after recreating the deployment, so data was successfully persisted with a PV and PVC!  🎉🎉🎉
+### Using an SMB share as persistent storage
+- Config files are in the folder ```remote-storage-smb-deployment```
+- Created a share on TrueNAS called 'kubernetes-testing'
+- Installed the SMB CSI driver -- https://github.com/kubernetes-csi/csi-driver-smb/tree/master
+- Generate a secret to store share credentials with ```kubectl create secret generic smbcreds --from-literal username=USERNAME --from-literal password="PASSWORD"```
+	- note: the *generic* flag is used to denote that the secret being created is an 'Opaque' secret (arbitrary, user-defined data). There are other secret types for various specific use cases such as docker registry credentials or tls certificates. https://kubernetes.io/docs/concepts/configuration/secret/
+- Used this video from the Youtube channel Jim's garage for reference with the PV and PVC configs https://www.youtube.com/watch?v=3S5oeB2qhyg&t=318s
+- Got a permission denied error on the pod, appears to be when mounting smb share in fstab
+- Ran the following to verify contents of the secret: ```kubectl get secret smbcreds  -o jsonpath='{.data}'``` which gave the following output: ```{"password":"MXFhQFdTM2Vk","username":"a3VzZXI="}```
+- These values are base64 encoded, so I ran the password through an online decoder and found that it appears to have been cut off after 9 characters. 
+- Found out the reason that it was cut off was that when using double quotes the shell will interpret special characters. Since the password was a waterfall of 1qa@WS3ed$RF5tg --> the shell interpreted everything after the dollar sign as a variable (which was obviously empty)
+- After fixing this, everything appears to deploy without errors, however connecting with minikube service gives 'ERR_CONNECTION_REFUSED'
+- Checking pod logs -- it appears the app can't connect to SQLLite because the database is locked
+- Switched to an nginx image rather than uptme-kuma -- you wouldn't want a SQLLite DB on an SMB share anyway. 
+- Gave a mountpath of /usr/share/nginx/html
+- I thought if nothing existed for this volume it would create a default splashpage -- it didn't, and I got 403 forbidden
+- Added a hello-world HTML file to the share and then ran ```kubectl rollout restart deployment nginx``` to restart the pod(s)
+- It worked! :tada:
+- Scaled pods up from 1 to 2 and re-ran kubectl apply -- still works! :tada:
