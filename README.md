@@ -3,6 +3,8 @@
 # Kubernetes Demo Project
 Just me trying to wrap my head around kubernetes. Read my stream of consciousness at [NOTES.md](/NOTES.md)
 
+![](/kubernetes-componetnts.svg)
+
 ## Usage
 ### Start minikube with Docker driver
 ```
