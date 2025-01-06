@@ -2,51 +2,51 @@
 apiVersion: apps/v1
 kind: Deployment
 metadata:
-  name: nginx
+  name: heimdall
   labels:
-    app: nginx
+    app: heimdall
 spec:
   replicas: 2
   selector:
     matchLabels:
-      app: nginx
+      app: heimdall
   template:
     metadata:
       labels:
-        app: nginx
+        app: heimdall
     spec:
       containers:
-      - name: nginx
-        image: nginx
+      - name: heimdall
+        image: linuxserver/heimdall
         ports:
         - containerPort: 80
         volumeMounts: # Volume must be created along with volumeMount (see next below)
-        - name: nginx-data
-          mountPath: /usr/share/nginx/html # Path within the container, like the right side of a docker bind mount -- /tmp/data:/app/data
-          subPath: nginx/data
+        - name: heimdall-config
+          mountPath: /config # Path within the container, like the right side of a docker bind mount -- /tmp/data:/app/data
+          subPath: heimdall/config
       volumes: # Defines a volume that uses an existing PVC (defined below)
-      - name: nginx-data
+      - name: heimdall-config
         persistentVolumeClaim:
-          claimName: nginx-pvc
+          claimName: heimdall-pvc
 ---
 apiVersion: v1
 kind: Service
 metadata:
-  name: nginx-service
+  name: heimdall-service
 spec:
   selector:
-    app: nginx
+    app: heimdall
   type: LoadBalancer  
   ports:
     - protocol: TCP
       port: 80
       targetPort: 80
-      nodePort: 30000
+      nodePort: 30001
 ---
 kind: PersistentVolumeClaim
 apiVersion: v1
 metadata:
-  name: nginx-pvc
+  name: heimdall-pvc
   namespace: default
 spec:
   accessModes:
