@@ -3,6 +3,8 @@
 # Kubernetes Demo Project
 Just me trying to wrap my head around kubernetes. Read my stream of consciousness at [NOTES.md](/NOTES.md)
 
+This was all done on a local [minikube](https://minikube.sigs.k8s.io/docs/start/?arch=%2Flinux%2Fx86-64%2Fstable%2Fbinary+download) cluster.
+
 ![](/kubernetes-componetnts.svg)
 
 ## Usage
